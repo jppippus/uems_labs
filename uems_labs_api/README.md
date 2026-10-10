@@ -52,6 +52,21 @@ aba **Application** → **Local Storage** → `http://localhost:9000` e procure
 a chave `sb-<project_ref>-auth-token`. O `access_token` está dentro do JSON
 guardado ali.
 
+### Criando contas (aluno/professor/técnico)
+
+Não existe tela de cadastro (RF001). Contas são criadas direto no painel do
+Supabase (*Authentication → Users → Add user*), preenchendo o campo
+**User Metadata** com um JSON, por exemplo:
+
+```json
+{ "rgm": "2023001", "nome": "João Silva", "perfil": "professor" }
+```
+
+Um trigger (`handle_new_user`) lê esse metadata e cria a linha correspondente
+em `usuarios` automaticamente. Se `rgm`/`nome`/`perfil` não forem informados,
+cai em um fallback (prefixo do e-mail como rgm, perfil `aluno`) — nunca em um
+valor fixo, porque `rgm` é `UNIQUE` no banco.
+
 O PHP valida esse token chamando o próprio Supabase (`/auth/v1/user`) e
 depois busca o perfil (nome, rgm, perfil) na tabela `usuarios`. Cada endpoint
 recebe esse usuário já validado:
