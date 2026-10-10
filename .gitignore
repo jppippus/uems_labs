@@ -42,6 +42,10 @@ build/Release
 node_modules/
 jspm_packages/
 
+# Quasar CLI build cache (gerado automaticamente a cada "quasar dev"/"quasar build")
+.quasar/
+quasar.config.js.temporary.compiled.*.js
+
 # Snowpack dependency directory (https://snowpack.dev/)
 web_modules/
 
