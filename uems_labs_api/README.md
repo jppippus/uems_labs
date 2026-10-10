@@ -64,6 +64,40 @@ $usuario = require_auth();
 require_perfil($usuario, ['tecnico']);
 ```
 
+## Regras de negócio já prontas no banco
+
+**Choque de horário (RF002/RF003):** o banco tem uma constraint
+(`reservas_sem_choque`) que rejeita qualquer INSERT/UPDATE em `reservas` que
+sobreponha horário com outra reserva **ativa** do mesmo `recurso_id` — vale
+tanto pra reserva normal quanto pra fixa, automaticamente. Em
+`api/reservas/criar.php`, envolva o `INSERT` num `try/catch (PDOException)` e,
+se o `getCode()` for `23P01` (violação de exclusion constraint), responda
+`json_error('Esse horário já está reservado.', 409)`.
+
+**Reserva fixa (RF003):** não faça o INSERT manualmente — chame a função
+`criar_reserva_fixa` já pronta no banco, que gera uma reserva por semana entre
+duas datas (mesmo dia da semana de `data_inicio`) e desfaz tudo se qualquer
+semana colidir com outra reserva:
+
+```php
+$stmt = $pdo->prepare('SELECT * FROM criar_reserva_fixa(:usuario_id, :recurso_id, :hora_inicio, :hora_fim, :proposito, :data_inicio, :data_fim)');
+$stmt->execute([
+    'usuario_id'   => $usuario['id'],
+    'recurso_id'   => $body['recurso_id'],
+    'hora_inicio'  => $body['hora_inicio'],
+    'hora_fim'     => $body['hora_fim'],
+    'proposito'    => $body['proposito'],
+    'data_inicio'  => $body['data_inicio'], // primeira ocorrência
+    'data_fim'     => $body['data_fim'],    // até quando repete (ex: fim do semestre)
+]);
+$reservas = $stmt->fetchAll();
+```
+
+**Resolver problema (RF010):** `api/problemas/resolver.php` só precisa dar um
+`UPDATE problemas_relatados SET status = 'resolvido' WHERE id = :id` — um
+trigger no banco já libera o `recurso` (volta pra `disponivel`) sozinho,
+nenhuma lógica extra necessária no PHP.
+
 ## Padrão de pastas e arquivos
 
 ```
