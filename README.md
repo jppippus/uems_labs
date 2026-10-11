@@ -48,6 +48,17 @@ Quasar (Vue 3)  --fetch-->  PHP/Apache local (PDO)  -->  Postgres (Supabase)
 Detalhes de cada tarefa, requisitos completos e critérios: ver
 `docs/divisao-de-tarefas.docx`.
 
+## Pendências entre tarefas
+
+- **RF005 ⟷ RF008**: `RelatarProblemaPage.vue` hoje deixa escolher
+  laboratório/recurso direto (não depende de reserva), porque
+  `api/reservas/listar.php` (Integrante B) ainda não existe. O requisito
+  pede reserva_id obrigatório ("a partir de uma reserva realizada"). Quando
+  B terminar o `listar.php`: trocar o seletor por uma lista das reservas do
+  usuário, e mover a derivação do `recurso_id` pro backend (a partir da
+  `reserva_id`, em vez de confiar no que o cliente manda). Ver comentário em
+  `RelatarProblemaPage.vue` e `uems_labs_api/api/problemas/relatar.php`.
+
 ## Como chamar o backend a partir do Vue
 
 Use a composable `src/composables/UseApi.js` — ela já injeta o token da
