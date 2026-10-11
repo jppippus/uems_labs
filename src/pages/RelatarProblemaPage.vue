@@ -61,6 +61,15 @@
 </template>
 
 <script>
+// PENDENCIA (RF005): o requisito pede que o problema seja relatado "a partir
+// de uma reserva realizada" (reserva_id obrigatorio, recurso_id derivado
+// dela). Por enquanto deixamos o usuario escolher laboratorio/recurso
+// direto, pra nao depender do endpoint de "Minhas Reservas" (Integrante B,
+// api/reservas/listar.php) que ainda nao existe. Quando esse endpoint
+// estiver pronto: trocar o seletor de laboratorio/recurso abaixo por um
+// seletor das reservas do proprio usuario, e mandar reserva_id pro backend
+// (o PHP passa a derivar o recurso_id a partir da reserva, em vez de
+// confiar no recurso_id que o cliente manda).
 import { defineComponent, ref, computed, onMounted } from 'vue'
 import useProblemasApi from '../composables/UseProblemasApi'
 import useNotify from '../composables/UseNotify'

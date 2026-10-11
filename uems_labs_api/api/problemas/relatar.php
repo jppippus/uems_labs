@@ -8,6 +8,13 @@ require_once __DIR__ . '/../../config/database.php';
 // POST /uems-api/api/problemas/relatar.php
 // RF005: reporta um problema num recurso (sala/mesa/computador). O trigger
 // trg_indisponibilizar_recurso ja marca o recurso como indisponivel sozinho.
+//
+// PENDENCIA: RF005 pede reserva_id obrigatorio ("a partir de uma reserva
+// realizada"); hoje aceitamos recurso_id direto do cliente porque
+// api/reservas/listar.php (Integrante B) ainda nao existe. Quando existir,
+// trocar pra exigir reserva_id e derivar o recurso_id dela aqui no backend
+// (SELECT recurso_id FROM reservas WHERE id = :reserva_id AND usuario_id =
+// :usuario_id), em vez de confiar no recurso_id enviado pelo cliente.
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     json_error('Método não permitido.', 405);
