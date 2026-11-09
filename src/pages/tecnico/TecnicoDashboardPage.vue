@@ -2,12 +2,12 @@
   <q-page padding>
     <div class="q-mb-md">
       <h4 class="text-weight-bold q-my-none">Painel do Técnico</h4>
-      <p class="text-grey-7">Acompanhamento das reservas e laboratórios do sistema</p>
+      <p class="text-grey-7">Reservas ativas programadas para hoje</p>
     </div>
 
     <q-card flat bordered class="q-pa-md">
       <q-table
-        title="Reservas Registadas"
+        title="Reservas de Hoje"
         :rows="reservas"
         :columns="columns"
         row-key="id"
@@ -17,7 +17,7 @@
           <q-td :props="props">
             <q-chip
               dense
-              :color="props.row.status === 'ativo' ? 'green' : 'orange'"
+              :color="props.row.status === 'ativa' ? 'green' : 'orange'"
               text-color="white"
             >
               {{ props.row.status }}
@@ -31,52 +31,33 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { api } from 'boot/axios'
-import { useQuasar } from 'quasar'
+import useTecnicoApi from '../../composables/UseTecnicoApi'
+import useNotify from '../../composables/UseNotify'
 
-const $q = useQuasar()
+const { getDashboard } = useTecnicoApi()
+const { notifyError } = useNotify()
+
 const reservas = ref([])
 const loading = ref(false)
 
 const columns = [
-  { name: 'id', label: 'ID', field: 'id', align: 'left', sortable: true },
-  {
-    name: 'laboratorio_nome',
-    label: 'Laboratório',
-    field: 'laboratorio_nome',
-    align: 'left',
-    sortable: true,
-  },
-  {
-    name: 'usuario_nome',
-    label: 'Utilizador',
-    field: 'usuario_nome',
-    align: 'left',
-    sortable: true,
-  },
-  { name: 'data', label: 'Data', field: 'data', align: 'left', sortable: true },
+  { name: 'laboratorio_nome', label: 'Laboratório', field: 'laboratorio_nome', align: 'left', sortable: true },
+  { name: 'usuario_nome', label: 'Usuário', field: 'usuario_nome', align: 'left', sortable: true },
+  { name: 'hora_inicio', label: 'Início', field: 'hora_inicio', align: 'left', sortable: true },
+  { name: 'hora_fim', label: 'Fim', field: 'hora_fim', align: 'left', sortable: true },
   { name: 'status', label: 'Status', field: 'status', align: 'center' },
 ]
 
 const carregarReservas = async () => {
   loading.value = true
   try {
-    const response = await api.get('/tecnico/dashboard.php')
-    if (response.data.ok) {
-      reservas.value = response.data.reservas
-    }
-  } catch {
-    $q.notify({
-      color: 'negative',
-      message: 'Erro ao carregar as reservas do dashboard.',
-      icon: 'report_problem',
-    })
+    reservas.value = await getDashboard()
+  } catch (error) {
+    notifyError('Erro ao carregar as reservas do dashboard.', error.message)
   } finally {
     loading.value = false
   }
 }
 
-onMounted(() => {
-  carregarReservas()
-})
+onMounted(carregarReservas)
 </script>

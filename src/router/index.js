@@ -5,7 +5,7 @@ import {
   createWebHashHistory,
   createWebHistory,
 } from 'vue-router'
-import { useSupabase } from '../boot/supabase'
+import useAuthUser from '../composables/UseAuthUser'
 
 import routes from './routes.js'
 
@@ -36,16 +36,19 @@ export default defineRouter((/* { store, ssrContext } */) => {
   })
 
   Router.beforeEach(async (to, from, next) => {
-    const { supabase } = useSupabase()
-    const { data: { session } } = await supabase.auth.getSession()
+    const { perfil, sincronizarSessao } = useAuthUser()
+    const session = await sincronizarSessao()
     const isAuthenticated = !!session
 
     if (to.meta.requiresAuth && !isAuthenticated) {
       // Rota protegida sem sessão → vai pro login
       next({ name: 'login' })
     } else if (to.name === 'login' && isAuthenticated) {
-      // Já autenticado tentando acessar login → vai pra home
-      next({ name: 'home' })
+      // Já autenticado tentando acessar login → vai pra home do perfil
+      next(perfil.value === 'tecnico' ? { name: 'tecnico-dashboard' } : { name: 'home' })
+    } else if (to.meta.perfil && perfil.value && !to.meta.perfil.includes(perfil.value)) {
+      // Rota restrita a um perfil que não é o do usuário logado
+      next(perfil.value === 'tecnico' ? { name: 'tecnico-dashboard' } : { name: 'home' })
     } else {
       next()
     }

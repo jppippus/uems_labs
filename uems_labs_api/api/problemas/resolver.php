@@ -23,15 +23,15 @@ if (empty($body['problema_id'])) {
 
 $problemaId = $body['problema_id'];
 
+$pdo = get_db_connection();
 
-try {
-    $pdo = get_db_connection();
-    
-   
-    $stmt = $pdo->prepare('UPDATE problemas_relatados SET status = \'resolvido\' WHERE id = ?');
-    $stmt->execute([$problemaId]);
+// O trigger trg_liberar_recurso_apos_resolucao ja libera o recurso sozinho.
+$stmt = $pdo->prepare("UPDATE problemas_relatados SET status = 'resolvido' WHERE id = :id RETURNING id, status");
+$stmt->execute(['id' => $problemaId]);
+$problema = $stmt->fetch();
 
-    json_response(['ok' => true, 'mensagem' => 'Problema resolvido com sucesso!']);
-} catch (Exception $e) {
-    json_error('Erro ao resolver o problema: ' . $e->getMessage(), 500);
+if (!$problema) {
+    json_error('Problema não encontrado.', 404);
 }
+
+json_response($problema);

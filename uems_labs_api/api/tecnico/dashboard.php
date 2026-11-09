@@ -1,42 +1,37 @@
 <?php
 
-/**
- * MODELO DE ENDPOINT — copie este arquivo como ponto de partida para o seu.
- * Não é chamado pelo frontend, serve só de referência do padrão a seguir.
- *
- * Padrão de pastas: api/<dominio>/<acao>.php
- *   ex: api/reservas/criar.php, api/problemas/relatar.php
- */
+require_once __DIR__ . '/../../helpers/cors.php';
+require_once __DIR__ . '/../../helpers/response.php';
+require_once __DIR__ . '/../../middleware/auth.php';
+require_once __DIR__ . '/../../config/database.php';
 
-require_once __DIR__ . '/../helpers/cors.php';
-require_once __DIR__ . '/../helpers/response.php';
-require_once __DIR__ . '/../middleware/auth.php';
-require_once __DIR__ . '/../config/database.php';
+// GET /uems-api/api/tecnico/dashboard.php
+// RF009: reservas ativas programadas para hoje, pro painel do tecnico.
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+if ($_SERVER['REQUEST_METHOD'] !== 'GET') {
     json_error('Método não permitido.', 405);
 }
 
 $usuario = require_auth();
-
-
- require_perfil($usuario, ['tecnico']);
-
-
-$body = json_body();
-if (empty($body['campo_obrigatorio'])) {
-    json_error('O campo "campo_obrigatorio" é obrigatório.', 422);
-}
-
+require_perfil($usuario, ['tecnico']);
 
 $pdo = get_db_connection();
-$stmt = $pdo->prepare('SELECT r.*, l.nome as laboratorio_nome, u.nome as usuario_nome 
-                       FROM reservas r 
-                       JOIN laboratorios l ON r.laboratorio_id = l.id 
-                       JOIN usuarios u ON r.usuario_id = u.id 
-                       ORDER BY r.created_at DESC');
-$stmt->execute();
-$reservas = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$stmt = $pdo->query(
+    "SELECT
+        r.id,
+        l.nome AS laboratorio_nome,
+        u.nome AS usuario_nome,
+        r.data_reserva AS data,
+        r.hora_inicio,
+        r.hora_fim,
+        r.status
+     FROM reservas r
+     JOIN recursos rec ON rec.id = r.recurso_id
+     JOIN laboratorios l ON l.id = rec.laboratorio_id
+     JOIN usuarios u ON u.id = r.usuario_id
+     WHERE r.data_reserva = CURRENT_DATE
+       AND r.status = 'ativa'
+     ORDER BY r.hora_inicio"
+);
 
-
-json_response(['ok' => true, 'reservas' => $reservas]);
+json_response($stmt->fetchAll());

@@ -65,7 +65,7 @@ export default defineComponent({
   name: 'LoginPage',
   setup() {
     const router = useRouter()
-    const { login } = useAuthUser()
+    const { login, perfil } = useAuthUser()
     const { notifyError, notifySuccess } = useNotify()
     
     const form = ref({ email: '', password: '' })
@@ -74,9 +74,9 @@ export default defineComponent({
     const handleLogin = async () => {
       try {
         loading.value = true
-        await login(form.value) // Mock no Supabase
+        await login(form.value)
         notifySuccess('Login realizado com sucesso!')
-        router.push({ name: 'home' })
+        router.push({ name: perfil.value === 'tecnico' ? 'tecnico-dashboard' : 'home' })
       } catch (error) {
         notifyError('Credenciais inválidas.', error.message)
       } finally {

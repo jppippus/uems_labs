@@ -2,7 +2,7 @@
   <q-page padding>
     <div class="q-mb-md">
       <h4 class="text-weight-bold q-my-none">Gestão de Problemas</h4>
-      <p class="text-grey-7">Lista de problemas relatados pelos utilizadores nos laboratórios</p>
+      <p class="text-grey-7">Problemas relatados pelos usuários nos laboratórios</p>
     </div>
 
     <q-card flat bordered class="q-pa-md">
@@ -13,6 +13,18 @@
         row-key="id"
         :loading="loading"
       >
+        <template #body-cell-status="props">
+          <q-td :props="props">
+            <q-chip
+              dense
+              :color="props.row.status === 'aberto' ? 'orange' : 'green'"
+              text-color="white"
+            >
+              {{ props.row.status }}
+            </q-chip>
+          </q-td>
+        </template>
+
         <template #body-cell-acoes="props">
           <q-td :props="props">
             <q-btn
@@ -20,8 +32,9 @@
               color="primary"
               label="Resolver"
               icon="check"
-              :disabled="props.row.status === 'resolvido'"
-              @click="resolverProblema(props.row.id)"
+              :disable="props.row.status === 'resolvido'"
+              :loading="resolvendoId === props.row.id"
+              @click="resolver(props.row.id)"
             />
           </q-td>
         </template>
@@ -32,22 +45,21 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { api } from 'boot/axios'
-import { useQuasar } from 'quasar'
+import useTecnicoApi from '../../composables/UseTecnicoApi'
+import useNotify from '../../composables/UseNotify'
 
-const $q = useQuasar()
+const { getProblemas, resolverProblema } = useTecnicoApi()
+const { notifySuccess, notifyError } = useNotify()
+
 const problemas = ref([])
 const loading = ref(false)
+const resolvendoId = ref(null)
 
 const columns = [
-  { name: 'id', label: 'ID', field: 'id', align: 'left', sortable: true },
-  {
-    name: 'descricao',
-    label: 'Descrição do Problema',
-    field: 'descricao',
-    align: 'left',
-    sortable: true,
-  },
+  { name: 'laboratorio_nome', label: 'Laboratório', field: 'laboratorio_nome', align: 'left', sortable: true },
+  { name: 'recurso_identificacao', label: 'Recurso', field: 'recurso_identificacao', align: 'left', sortable: true },
+  { name: 'tipo_problema', label: 'Problema', field: 'tipo_problema', align: 'left', sortable: true },
+  { name: 'descricao', label: 'Descrição', field: 'descricao', align: 'left' },
   { name: 'status', label: 'Status', field: 'status', align: 'center', sortable: true },
   { name: 'acoes', label: 'Ações', field: 'acoes', align: 'center' },
 ]
@@ -55,42 +67,26 @@ const columns = [
 const carregarProblemas = async () => {
   loading.value = true
   try {
-    const response = await api.get('/problemas/listar.php')
-    if (response.data.ok) {
-      problemas.value = response.data.problemas
-    }
-  } catch {
-    $q.notify({
-      color: 'negative',
-      message: 'Erro ao carregar os problemas relatados.',
-      icon: 'report_problem',
-    })
+    problemas.value = await getProblemas()
+  } catch (error) {
+    notifyError('Erro ao carregar os problemas relatados.', error.message)
   } finally {
     loading.value = false
   }
 }
 
-const resolverProblema = async (id) => {
+const resolver = async (id) => {
   try {
-    const response = await api.post('/problemas/resolver.php', { problema_id: id })
-    if (response.data.ok) {
-      $q.notify({
-        color: 'positive',
-        message: 'Problema resolvido!',
-        icon: 'check_circle',
-      })
-      carregarProblemas()
-    }
-  } catch {
-    $q.notify({
-      color: 'negative',
-      message: 'Erro ao tentar resolver o problema.',
-      icon: 'report_problem',
-    })
+    resolvendoId.value = id
+    await resolverProblema(id)
+    notifySuccess('Problema resolvido!')
+    await carregarProblemas()
+  } catch (error) {
+    notifyError('Erro ao tentar resolver o problema.', error.message)
+  } finally {
+    resolvendoId.value = null
   }
 }
 
-onMounted(() => {
-  carregarProblemas()
-})
+onMounted(carregarProblemas)
 </script>
