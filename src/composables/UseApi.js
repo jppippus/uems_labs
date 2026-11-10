@@ -1,4 +1,4 @@
-import { useSupabase } from 'src/boot/supabase'
+import { useSupabase } from '../boot/supabase'
 
 const API_URL = import.meta.env.QCLI_API_URL
 

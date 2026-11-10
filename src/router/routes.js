@@ -8,15 +8,12 @@ const routes = [
       { path: '', name: 'home', component: () => import('../pages/IndexPage.vue') },
       // Quando acessar '/reservas', carrega a ReservaPage (temporário até criarmos a de listagem)
       { path: 'reservas', name: 'reservas', component: () => import('../pages/ReservaPage.vue') },
-<<<<<<< Updated upstream
-=======
       // RF005 - Relatar Problema
-      { path: 'problemas', name: 'problemas', component: () => import('../pages/RelatarProblemaPage.vue') },
+      //{ path: 'problemas', name: 'problemas', component: () => import('../pages/RelatarProblemaPage.vue') },
       // RF007 - Realizar Denúncia
-      { path: 'denuncia', name: 'denuncia', component: () => import('../pages/DenunciaPage.vue') },
+      //{ path: 'denuncia', name: 'denuncia', component: () => import('../pages/DenunciaPage.vue') },
       
       { path: 'reservar/:laboratorioId', name: 'fazer-reserva', component: () => import('../pages/ReservaPage.vue') }
->>>>>>> Stashed changes
     ]
   },
   {

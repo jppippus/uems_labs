@@ -66,6 +66,7 @@
                 :label="n === 2 ? 'Ver horário' : 'Reservar'" 
                 class="q-px-md" 
                 style="border-radius: 6px;"
+                :to="`/reservar/${n}`"
               />
             </div>
           </q-card-section>
