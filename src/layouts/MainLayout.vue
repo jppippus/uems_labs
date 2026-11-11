@@ -15,12 +15,9 @@
         <q-card class="bg-grey-9 text-white q-mb-md shadow-0" bordered style="border-color: #424242;">
           <q-card-section class="row items-center q-pa-sm">
             <q-avatar color="grey-7" text-color="white" size="32px" class="q-mr-sm">
-              {{ (user?.email || '?').charAt(0).toUpperCase() }}
+              {{ inicialAvatar }}
             </q-avatar>
-            <div>
-              <div class="text-weight-medium">{{ user?.email }}</div>
-              <div class="text-caption text-grey-5 text-capitalize">{{ perfil }}</div>
-            </div>
+            <div class="text-weight-medium text-capitalize">{{ perfilUsuario }}</div>
           </q-card-section>
         </q-card>
 
@@ -69,23 +66,51 @@
   </q-layout>
 </template>
 
-<script>
-import { defineComponent } from 'vue'
+<script setup>
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import useAuthUser from '../composables/UseAuthUser'
+import { useSupabase } from '../boot/supabase'
 
-export default defineComponent({
-  name: 'MainLayout',
-  setup() {
-    const router = useRouter()
-    const { user, perfil, logout } = useAuthUser()
+defineOptions({ name: 'MainLayout' })
 
-    const handleLogout = async () => {
-      await logout()
-      router.push({ name: 'login' })
+const router = useRouter()
+const { logout } = useAuthUser()
+const { supabase } = useSupabase()
+
+const inicialAvatar = ref('A')
+const perfilUsuario = ref('Acadêmico')
+
+const carregarDadosMenu = async () => {
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      const { data: userData } = await supabase
+        .from('usuarios')
+        .select('nome, perfil')
+        .eq('id', user.id)
+        .single()
+        
+      if (userData) {
+        if (userData.nome) {
+          inicialAvatar.value = userData.nome.charAt(0).toUpperCase()
+        }
+        if (userData.perfil) {
+          perfilUsuario.value = userData.perfil
+        }
+      }
     }
-
-    return { user, perfil, handleLogout }
+  } catch (error) {
+    console.error('Erro ao buscar dados para o menu:', error)
   }
+}
+
+const handleLogout = async () => {
+  await logout()
+  router.push({ name: 'login' })
+}
+
+onMounted(() => {
+  carregarDadosMenu()
 })
 </script>

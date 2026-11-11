@@ -19,7 +19,7 @@ function get_db_connection(): PDO
 
     $parts = parse_url($connectionString);
     $host = $parts['host'] ?? 'localhost';
-    $port = $parts['port'] ?? 5432;
+    $port = $parts['port'] ?? 6543;
     $dbname = isset($parts['path']) ? ltrim($parts['path'], '/') : 'postgres';
     $user = $parts['user'] ?? '';
     $pass = $parts['pass'] ?? '';
@@ -30,11 +30,12 @@ function get_db_connection(): PDO
         $pdo = new PDO($dsn, $user, $pass, [
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => true,
         ]);
     } catch (PDOException $e) {
         http_response_code(500);
         header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(['error' => 'Falha ao conectar ao banco de dados.']);
+        echo json_encode(['error' => 'Falha ao conectar: ' . $e->getMessage()]);
         exit;
     }
 
