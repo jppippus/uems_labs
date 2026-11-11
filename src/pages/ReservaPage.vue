@@ -32,7 +32,6 @@
     <div class="row q-col-gutter-lg q-mb-xl">
       <div class="col-12 col-md-5">
         <div class="text-subtitle2 text-weight-bold q-mb-sm text-grey-8">TIPO DE RESERVA</div>
-        <!-- Ajuste de row q-col-gutter-sm e estilo dos cards para terem a mesma altura -->
         <div class="row q-col-gutter-sm items-stretch">
           <div class="col-6">
             <q-card 
@@ -79,7 +78,6 @@
 
       <div class="col-12 col-md-7">
         <div class="text-subtitle2 text-weight-bold q-mb-sm text-grey-8">O QUE VOCÊ QUER RESERVAR?</div>
-        <!-- Ajuste para os cards de recurso também terem a mesma altura -->
         <div class="row q-col-gutter-sm items-stretch">
           <div class="col-4" v-for="recurso in ['Sala Completa', 'Computador', 'Apenas Mesa']" :key="recurso">
             <q-card bordered class="cursor-pointer q-pa-sm full-height column justify-between" :class="tipoRecurso === recurso ? 'border-primary bg-blue-1' : 'border-grey'" @click="toggleTipoRecurso(recurso)">
@@ -93,24 +91,18 @@
             </q-card>
           </div>
         </div>
-        
 
-        <!-- Botão para abrir o Mapa de Computadores -->
         <div v-if="tipoRecurso === 'Computador'" class="q-mt-md animate-fade">
           <q-btn 
-            outline 
-            color="primary" 
-            icon="mdi-desktop-classic" 
+            outline color="primary" icon="mdi-desktop-classic" 
             :label="recursoSelecionado ? 'Trocar Computador' : 'Ver Mapa de Computadores'" 
-            class="full-width q-py-sm text-weight-bold" 
-            @click="modalComputadores = true" 
+            class="full-width q-py-sm text-weight-bold" @click="modalComputadores = true" 
           />
           <div v-if="recursoSelecionado" class="text-center q-mt-sm text-positive text-weight-bold">
             <q-icon name="mdi-check-circle" /> Máquina selecionada!
           </div>
         </div>
 
-        <!-- POPUP: Mapa Visual de Computadores -->
         <q-dialog v-model="modalComputadores">
           <q-card style="width: 800px; max-width: 95vw; border-radius: 12px;">
             <q-card-section class="row items-center q-pb-none">
@@ -118,56 +110,38 @@
               <q-space />
               <q-btn icon="mdi-close" flat round dense v-close-popup />
             </q-card-section>
-
             <q-card-section>
-              <!-- Legenda -->
               <div class="row justify-center q-gutter-x-lg q-mb-lg text-caption text-weight-bold">
                 <div class="row items-center"><q-icon name="mdi-desktop-classic" color="positive" size="sm" class="q-mr-xs"/> Disponível</div>
                 <div class="row items-center"><q-icon name="mdi-desktop-classic" color="negative" size="sm" class="q-mr-xs"/> Em Manutenção</div>
                 <div class="row items-center"><q-icon name="mdi-desktop-classic" color="primary" size="sm" class="q-mr-xs"/> Seu PC</div>
               </div>
-
-              <!-- Grade de Computadores (Mini Ícones) -->
               <div class="row q-col-gutter-sm justify-center">
                 <div class="col-3 col-sm-2 text-center" v-for="pc in todosComputadores" :key="pc.id">
-                  <q-card
-                    flat bordered
-                    class="q-pa-sm transition-all"
-                    :class="getFundoComputador(pc)"
-                    @click="selecionarComputador(pc)"
-                    style="border-radius: 8px;"
-                  >
+                  <q-card flat bordered class="q-pa-sm transition-all" :class="getFundoComputador(pc)" @click="selecionarComputador(pc)" style="border-radius: 8px;">
                     <q-icon name="mdi-desktop-classic" size="lg" :color="getCorComputador(pc)" />
-                    <div class="text-caption q-mt-xs text-weight-bold" style="font-size: 11px;">
-                      {{ pc.identificacao }}
-                    </div>
+                    <div class="text-caption q-mt-xs text-weight-bold" style="font-size: 11px;">{{ pc.identificacao }}</div>
                   </q-card>
                 </div>
               </div>
             </q-card-section>
-
             <q-card-actions align="center" class="q-pa-md">
               <q-btn unelevated color="primary" label="Confirmar Seleção" v-close-popup class="q-px-xl" />
             </q-card-actions>
           </q-card>
         </q-dialog>
 
-        <!-- Botão para abrir o Mapa de Mesas -->
         <div v-if="tipoRecurso === 'Apenas Mesa'" class="q-mt-md animate-fade">
           <q-btn 
-            outline 
-            color="primary" 
-            icon="mdi-desk" 
+            outline color="primary" icon="mdi-desk" 
             :label="recursoSelecionado ? 'Trocar Mesa' : 'Ver Mapa de Mesas'" 
-            class="full-width q-py-sm text-weight-bold" 
-            @click="modalMesas = true" 
+            class="full-width q-py-sm text-weight-bold" @click="modalMesas = true" 
           />
           <div v-if="recursoSelecionado" class="text-center q-mt-sm text-positive text-weight-bold">
             <q-icon name="mdi-check-circle" /> Mesa selecionada!
           </div>
         </div>
 
-        <!-- POPUP: Mapa Visual de Mesas -->
         <q-dialog v-model="modalMesas">
           <q-card style="width: 800px; max-width: 95vw; border-radius: 12px;">
             <q-card-section class="row items-center q-pb-none">
@@ -175,34 +149,21 @@
               <q-space />
               <q-btn icon="mdi-close" flat round dense v-close-popup />
             </q-card-section>
-
             <q-card-section>
-              <!-- Legenda -->
               <div class="row justify-center q-gutter-x-lg q-mb-lg text-caption text-weight-bold">
                 <div class="row items-center"><q-icon name="mdi-desk" color="positive" size="sm" class="q-mr-xs"/> Disponível</div>
                 <div class="row items-center"><q-icon name="mdi-desk" color="negative" size="sm" class="q-mr-xs"/> Ocupada / Indisponível</div>
                 <div class="row items-center"><q-icon name="mdi-desk" color="primary" size="sm" class="q-mr-xs"/> Sua Mesa</div>
               </div>
-
-              <!-- Grade de Mesas (Mini Ícones) -->
               <div class="row q-col-gutter-sm justify-center">
                 <div class="col-3 col-sm-2 text-center" v-for="mesa in todasMesas" :key="mesa.id">
-                  <q-card
-                    flat bordered
-                    class="q-pa-sm transition-all"
-                    :class="getFundoComputador(mesa)"
-                    @click="selecionarComputador(mesa)"
-                    style="border-radius: 8px;"
-                  >
+                  <q-card flat bordered class="q-pa-sm transition-all" :class="getFundoComputador(mesa)" @click="selecionarComputador(mesa)" style="border-radius: 8px;">
                     <q-icon name="mdi-desk" size="lg" :color="getCorComputador(mesa)" />
-                    <div class="text-caption q-mt-xs text-weight-bold" style="font-size: 11px;">
-                      {{ mesa.identificacao }}
-                    </div>
+                    <div class="text-caption q-mt-xs text-weight-bold" style="font-size: 11px;">{{ mesa.identificacao }}</div>
                   </q-card>
                 </div>
               </div>
             </q-card-section>
-
             <q-card-actions align="center" class="q-pa-md">
               <q-btn unelevated color="primary" label="Confirmar Seleção" v-close-popup class="q-px-xl" />
             </q-card-actions>
@@ -211,9 +172,19 @@
       </div>
     </div>
 
-    <!-- Seção: Horários -->
-    <div class="text-subtitle2 text-weight-bold q-mb-md text-grey-8 row justify-between items-center">
-      ESCOLHA O HORÁRIO PARA ESTA SEMANA
+    <!-- CONTROLES DA SEMANA E LEGENDA -->
+    <div class="row justify-between items-center q-mb-md">
+      <div class="text-subtitle2 text-weight-bold text-grey-8">
+        ESCOLHA O HORÁRIO
+      </div>
+      
+      <!-- Navegação de Semanas -->
+      <div class="row items-center bg-white border-grey rounded-borders shadow-1 q-px-sm">
+        <q-btn flat dense icon="mdi-chevron-left" label="Anterior" @click="semanaOffset--" :disable="semanaOffset <= 0" color="primary" class="q-pr-sm" />
+        
+        <q-btn flat dense icon-right="mdi-chevron-right" label="Próxima" @click="semanaOffset++" color="primary" class="q-pl-sm" />
+      </div>
+
       <div class="row q-gutter-x-sm text-caption">
         <div class="row items-center"><div style="width:12px;height:12px;" class="border-green bg-green-1 q-mr-xs"></div> Disponível</div>
         <div class="row items-center"><div style="width:12px;height:12px;" class="bg-grey-3 q-mr-xs"></div> Ocupado</div>
@@ -221,22 +192,43 @@
       </div>
     </div>
     
-   <q-markup-table flat bordered class="q-mb-xl text-center table-fixed">
+    <q-markup-table flat bordered class="q-mb-xl text-center table-fixed">
       <thead>
         <tr class="bg-grey-1 text-grey-8 text-weight-bold">
           <th style="width: 15%">Horário</th>
-          <th v-for="dia in diasSemana" :key="dia" style="width: 17%">{{ dia }}</th>
+          <!-- Headers dinâmicos com Nome e Data -->
+          <th v-for="dia in diasDaSemanaDisplay" :key="dia.dataBanco" style="width: 17%">
+            <div class="text-subtitle2">{{ dia.nome }}</div>
+            <div class="text-caption text-weight-regular text-grey-6">{{ dia.dataDisplay }}</div>
+          </th>
         </tr>
       </thead>
       <tbody>
-        <tr v-for="horario in blocosHorario" :key="horario">
+        <tr v-for="horario in blocosHorario" :key="horario"> 
           <td class="text-weight-bold">{{ horario }}</td>
-          
-          <td v-for="dia in diasSemana" :key="dia">
-            <!-- Box wrapper para garantir mesma altura independente do estado -->
+          <td v-for="dia in diasDaSemanaDisplay" :key="dia.dataBanco">
             <div class="box-horario">
+              <!-- 1. Bloqueado pelo Tempo (Passado) -->
               <q-card 
-                v-if="checkSelecionado(dia, horario)" 
+                v-if="checkPassado(dia, horario)" 
+                flat bordered 
+                class="bg-grey-2 border-grey full-width full-height flex flex-center"
+              >
+                <div class="text-grey-4 text-weight-bold text-caption">Indisponível</div>
+              </q-card>
+
+              <!-- 2. Ocupado (Reserva no Banco) -->
+              <q-card 
+                v-else-if="checkOcupado(dia, horario)" 
+                flat bordered 
+                class="bg-grey-3 border-grey full-width full-height flex flex-center"
+              >
+                <div class="text-grey-6 text-weight-bold text-caption">Ocupado</div>
+              </q-card>
+              
+              <!-- 3. Selecionado (Azul) -->
+              <q-card 
+                v-else-if="checkSelecionado(dia, horario)" 
                 flat bordered 
                 class="border-primary bg-blue-1 cursor-pointer full-width full-height flex flex-center"
                 @click="toggleHorario(dia, horario)"
@@ -244,12 +236,13 @@
                 <div class="text-primary text-weight-bold text-caption">Selecionado</div>
               </q-card>
 
+              <!-- 4. Livre (Verde) -->
               <q-btn 
                 v-else 
                 outline 
                 color="positive" 
                 label="Livre" 
-                class="full-width full-height bg-green-1 text-caption text-weight-bold" 
+                class="full-width full-height bg-green-1 text-caption text-weight-bold cursor-pointer" 
                 padding="none"
                 @click="toggleHorario(dia, horario)"
               />
@@ -280,7 +273,7 @@
       </div>
     </q-card>
 
-    <!-- Footer Fixo (Dinâmico) -->
+    <!-- Footer Fixo -->
     <q-card flat bordered class="bg-grey-1 q-pa-md row justify-between items-center">
       <div class="row items-center">
         <q-icon name="mdi-calendar-check" size="md" color="primary" class="bg-white q-pa-sm rounded-borders q-mr-md shadow-1" />
@@ -299,13 +292,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useSupabase } from '../boot/supabase'
 import useReservasApi from '../composables/UseReservaApi'
 
 const { supabase } = useSupabase()
-const { listarLaboratorios, criarReserva } = useReservasApi()
+const { listarLaboratorios, criarReserva, listarReservasPorLaboratorio } = useReservasApi()
 const router = useRouter()
 const route = useRoute()
 
@@ -318,124 +311,77 @@ const motivo = ref(null)
 const descricao = ref('')
 const isProfessor = ref(false)
 
-// Lista de opções de motivo que muda consoante o perfil
-const opcoesMotivo = computed(() => {
-  const opcoesComuns = ['Trabalho em grupo', 'Estudo individual', 'Projeto de Extensão']
-  
-  if (isProfessor.value) {
-    return ['Sala de Aula', 'Horário de permanência', ...opcoesComuns]
-  }
-  
-  return opcoesComuns
-})
+const reservasOcupadas = ref([]) 
 
-// Controle de estado do Popup
 const modalComputadores = ref(false)
 const modalMesas = ref(false)
 const recursoSelecionado = ref(null)
 
-// Pega todas as Mesas do laboratório (Filtra onde a palavra 'mesa' aparece no tipo)
-const todasMesas = computed(() => {
-  if (!labAtual.value || !labAtual.value.recursos) return []
-  return labAtual.value.recursos
-    .filter(r => r.tipo.toLowerCase().includes('mesa'))
-    .sort((a, b) => a.identificacao.localeCompare(b.identificacao)) 
-})
+// Variável para controlar a navegação de semanas (0 = atual, 1 = próxima, etc)
+const semanaOffset = ref(0)
 
-// Pega todos os PCs do laboratório para desenhar a grade, organizados por ordem alfabética (PC 01, PC 02...)
-const todosComputadores = computed(() => {
-  if (!labAtual.value || !labAtual.value.recursos) return []
-  return labAtual.value.recursos
-    .filter(r => r.tipo.toLowerCase() === 'computador')
-    .sort((a, b) => a.identificacao.localeCompare(b.identificacao)) 
-})
-
-// Função ao clicar no mini-computador
-// --- FUNÇÕES DE SELEÇÃO E DESMARCAÇÃO ---
-
-// Alterna o Tipo de Reserva
-const toggleTipoReserva = (tipo) => {
-  if (tipo === 'fixa' && !isProfessor.value) return // Bloqueia alunos
-  tipoReserva.value = tipoReserva.value === tipo ? null : tipo
-}
-
-// Alterna o Tipo de Recurso (limpando a máquina se desmarcar)
-const toggleTipoRecurso = (recurso) => {
-  if (tipoRecurso.value === recurso) {
-    tipoRecurso.value = null
-    recursoSelecionado.value = null
-  } else {
-    tipoRecurso.value = recurso
-    recursoSelecionado.value = null
-  }
-}
-
-// Alterna a seleção de um PC ou Mesa no mapa
-const selecionarComputador = (item) => {
-  if (item.status !== 'disponivel') return // Impede de selecionar estragados
-  // Se clicar no mesmo que já estava selecionado, limpa (null). Se não, seleciona o novo.
-  recursoSelecionado.value = recursoSelecionado.value === item.id ? null : item.id
-}
-
-// Controla a cor do ícone no mapa
-const getCorComputador = (pc) => {
-  if (recursoSelecionado.value === pc.id) return 'white'
-  if (pc.status === 'disponivel') return 'positive' // Verde
-  return 'negative' // Vermelho
-}
-
-// Controla a cor do fundo e a borda do card do computador
-const getFundoComputador = (pc) => {
-  if (recursoSelecionado.value === pc.id) return 'bg-primary text-white cursor-pointer shadow-3'
-  if (pc.status === 'disponivel') return 'bg-white border-grey cursor-pointer'
-  return 'bg-grey-2 border-grey text-grey-5 cursor-not-allowed' // Bloqueado
-}
-
-// Dados da Grade Semanal
-const diasSemana = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta']
-const blocosHorario = ['13:30 - 15:30', '15:30 - 17:30', '19:00 - 21:00', '21:00 - 23:00']
-const horariosSelecionados = ref([])
-
-const toggleHorario = (dia, horario) => {
-  const identificador = `${dia}|${horario}`
-  const index = horariosSelecionados.value.indexOf(identificador)
-  if (index > -1) horariosSelecionados.value.splice(index, 1)
-  else horariosSelecionados.value.push(identificador)
-}
-
-const resumoHorarios = computed(() => {
-  if (horariosSelecionados.value.length === 0) return 'Nenhum horário selecionado'
-  if (horariosSelecionados.value.length === 1) {
-    const [dia, hora] = horariosSelecionados.value[0].split('|')
-    return `${dia}-feira | ${hora}`
-  }
-  return `${horariosSelecionados.value.length} horários selecionados`
-})
-
-const checkSelecionado = (dia, horario) => horariosSelecionados.value.includes(`${dia}|${horario}`)
-
-const laboratorioId = route.params.laboratorioId
-const dadosLaboratorio = ref([])
-const carregando = ref(false)
-
-const labAtual = computed(() => {
-  if (!dadosLaboratorio.value || dadosLaboratorio.value.length === 0) return null
+// COMPUTED: Gera os dias da semana automaticamente com a data correta baseada no offset
+const diasDaSemanaDisplay = computed(() => {
+  const dias = []
+  const nomesDias = ['Segunda', 'Terça', 'Quarta', 'Quinta', 'Sexta']
+  const hoje = new Date()
   
-  return dadosLaboratorio.value.find(lab => 
-    String(lab.id) === String(laboratorioId) || 
-    lab.nome.includes(`0${laboratorioId}`) || 
-    lab.nome.includes(String(laboratorioId))
-  )
+  let diaSemanaAtual = hoje.getDay()
+  if (diaSemanaAtual === 0) diaSemanaAtual = 7 // Normaliza Domingo para 7
+  
+  for (let i = 1; i <= 5; i++) {
+    const diff = i - diaSemanaAtual + (semanaOffset.value * 7)
+    const dataAlvo = new Date(hoje)
+    dataAlvo.setDate(hoje.getDate() + diff)
+    
+    const dd = String(dataAlvo.getDate()).padStart(2, '0')
+    const mm = String(dataAlvo.getMonth() + 1).padStart(2, '0')
+    const yyyy = dataAlvo.getFullYear()
+    
+    dias.push({
+      nome: nomesDias[i-1],
+      dataDisplay: `${dd}-${mm}-${yyyy}`, // Visualização (DD-MM-YYYY)
+      dataBanco: `${yyyy}-${mm}-${dd}`    // Salvar no BD (YYYY-MM-DD)
+    })
+  }
+  return dias
 })
 
-// --- CARREGAR OS DADOS ---
+const atualizarGradeReservas = async () => {
+  if (!labAtual.value) return
+  
+  try {
+    const data = await listarReservasPorLaboratorio(labAtual.value.id)
+    console.log("Reservas vindas do banco:", data) // Inspecione isto no F12!
+    
+    const todasReservas = Array.isArray(data) ? data : (data.data || data.reservas || [])
+    
+    reservasOcupadas.value = todasReservas.filter(res => {
+      // 1. Se o usuário escolheu "Computador" mas ainda não clicou no mapa:
+      // Mantém a grelha livre para não o confundir até ele escolher a máquina.
+      if ((tipoRecurso.value === 'Computador' || tipoRecurso.value === 'Apenas Mesa') && !recursoSelecionado.value) {
+        return false 
+      }
+
+      // 2. Se ele já selecionou uma máquina específica (PC ou Mesa):
+      if (recursoSelecionado.value) {
+        // Bloqueia se o PC estiver reservado OU se a SALA INTEIRA estiver reservada (ninguém usa o PC se a sala estiver fechada para uma turma)
+        return res.recurso_id === recursoSelecionado.value || res.recurso_tipo === 'sala' || res.recurso_tipo === 'sala completa'
+      }
+      
+      // 3. Se ele escolheu "Sala Completa":
+      // QUALQUER reserva de PC, Mesa ou da própria Sala bloqueia a Sala Inteira
+      return true 
+    })
+  } catch (error) {
+    console.error("Erro ao buscar reservas ocupadas:", error)
+  }
+}
+
 const carregarLaboratorio = async () => {
   try {
     carregando.value = true
-    
-    // Pega o utilizador logado no Auth
     const { data: { user } } = await supabase.auth.getUser()
-    
     if (user) {
       const { data: perfilData, error: perfilError } = await supabase
         .from('usuarios')
@@ -451,6 +397,8 @@ const carregarLaboratorio = async () => {
     const data = await listarLaboratorios()
     dadosLaboratorio.value = Array.isArray(data) ? data : (data.data || data.laboratorios || [])
     
+    await atualizarGradeReservas()
+    
   } catch (error) {
     console.error("Falha ao buscar laboratórios:", error)
   } finally {
@@ -458,15 +406,140 @@ const carregarLaboratorio = async () => {
   }
 }
 
-// --- SALVAR A RESERVA NO BANCO ---
-const salvarReserva = async () => {
-  if (!tipoReserva.value) {
-    alert("Por favor, selecione o Tipo de Reserva (Normal ou Fixa).")
-    return
-  }
+watch(recursoSelecionado, () => {
+  atualizarGradeReservas()
+  horariosSelecionados.value = [] 
+})
 
-  if (!tipoRecurso.value) {
-    alert("Por favor, selecione o que deseja reservar (Sala, Computador ou Mesa).")
+// LOGIC UPDATE: Verifica se está ocupado considerando datas exatas e reservas fixas
+const checkOcupado = (dia, horarioStr) => {
+  // Correção da desestruturação: Agora pega na string corretamente ("13:30")
+  const horaInicio = horarioStr.split(' - ')[0]
+  
+  return reservasOcupadas.value.some(res => {
+    // 1. A reserva no banco tem de começar à mesma hora
+    if (!res.hora_inicio.startsWith(horaInicio)) return false
+
+    // 2. Se a reserva no banco for "Fixa", bloqueia este dia da semana para sempre!
+    if (res.tipo === 'fixa') {
+      const dataReservaFixa = new Date(res.data_reserva + 'T12:00:00')
+      const dataDaCelula = new Date(dia.dataBanco + 'T12:00:00')
+      
+      // Se for o mesmo dia da semana e a data visualizada for igual ou após o início da reserva
+      if (dataReservaFixa.getDay() === dataDaCelula.getDay() && dataDaCelula >= dataReservaFixa) {
+        return true
+      }
+    }
+
+    // 3. Se for uma reserva "Normal", compara exatamente as datas (YYYY-MM-DD)
+    return res.data_reserva === dia.dataBanco
+  })
+}
+
+// NOVA FUNÇÃO: Verifica se o dia/hora daquela célula já ficou no passado
+const checkPassado = (dia, horarioStr) => {
+  const horaInicio = horarioStr.split(' - ')[0] // Pega o "13:30"
+  
+  // Monta a data e hora exata da célula (Ex: "2026-11-09T13:30:00")
+  const dataHoraCelula = new Date(`${dia.dataBanco}T${horaInicio}:00`)
+  const agora = new Date() // Pega a data e hora atual do computador do usuário
+  
+  return dataHoraCelula < agora // Retorna true se a célula for mais antiga que o momento atual
+}
+
+const opcoesMotivo = computed(() => {
+  const opcoesComuns = ['Trabalho em grupo', 'Estudo individual', 'Projeto de Extensão']
+  if (isProfessor.value) {
+    return ['Sala de Aula', 'Horário de permanência', ...opcoesComuns]
+  }
+  return opcoesComuns
+})
+
+const todasMesas = computed(() => {
+  if (!labAtual.value || !labAtual.value.recursos) return []
+  return labAtual.value.recursos
+    .filter(r => r.tipo.toLowerCase().includes('mesa'))
+    .sort((a, b) => a.identificacao.localeCompare(b.identificacao)) 
+})
+
+const todosComputadores = computed(() => {
+  if (!labAtual.value || !labAtual.value.recursos) return []
+  return labAtual.value.recursos
+    .filter(r => r.tipo.toLowerCase() === 'computador')
+    .sort((a, b) => a.identificacao.localeCompare(b.identificacao)) 
+})
+
+const toggleTipoReserva = (tipo) => {
+  if (tipo === 'fixa' && !isProfessor.value) return 
+  tipoReserva.value = tipoReserva.value === tipo ? null : tipo
+}
+
+const toggleTipoRecurso = (recurso) => {
+  if (tipoRecurso.value === recurso) {
+    tipoRecurso.value = null
+    recursoSelecionado.value = null
+  } else {
+    tipoRecurso.value = recurso
+    recursoSelecionado.value = null
+  }
+}
+
+const selecionarComputador = (item) => {
+  if (item.status !== 'disponivel') return 
+  recursoSelecionado.value = recursoSelecionado.value === item.id ? null : item.id
+}
+
+const getCorComputador = (pc) => {
+  if (recursoSelecionado.value === pc.id) return 'white'
+  if (pc.status === 'disponivel') return 'positive' 
+  return 'negative' 
+}
+
+const getFundoComputador = (pc) => {
+  if (recursoSelecionado.value === pc.id) return 'bg-primary text-white cursor-pointer shadow-3'
+  if (pc.status === 'disponivel') return 'bg-white border-grey cursor-pointer'
+  return 'bg-grey-2 border-grey text-grey-5 cursor-not-allowed' 
+}
+
+const blocosHorario = ['13:30 - 15:30', '15:30 - 17:30', '19:00 - 21:00', '21:00 - 23:00']
+const horariosSelecionados = ref([])
+
+// Agora gravamos a data EXATA da base de dados atrelada à seleção (ex: "2026-11-09|13:30 - 15:30")
+const toggleHorario = (dia, horario) => {
+  const identificador = `${dia.dataBanco}|${horario}`
+  const index = horariosSelecionados.value.indexOf(identificador)
+  if (index > -1) horariosSelecionados.value.splice(index, 1)
+  else horariosSelecionados.value.push(identificador)
+}
+
+const resumoHorarios = computed(() => {
+  if (horariosSelecionados.value.length === 0) return 'Nenhum horário selecionado'
+  if (horariosSelecionados.value.length === 1) {
+    const [dataBanco, hora] = horariosSelecionados.value[0].split('|')
+    const [y, m, d] = dataBanco.split('-')
+    return `${d}/${m}/${y} | ${hora}`
+  }
+  return `${horariosSelecionados.value.length} horários selecionados`
+})
+
+const checkSelecionado = (dia, horario) => horariosSelecionados.value.includes(`${dia.dataBanco}|${horario}`)
+
+const laboratorioId = route.params.laboratorioId
+const dadosLaboratorio = ref([])
+const carregando = ref(false)
+
+const labAtual = computed(() => {
+  if (!dadosLaboratorio.value || dadosLaboratorio.value.length === 0) return null
+  return dadosLaboratorio.value.find(lab => 
+    String(lab.id) === String(laboratorioId) || 
+    lab.nome.includes(`0${laboratorioId}`) || 
+    lab.nome.includes(String(laboratorioId))
+  )
+})
+
+const salvarReserva = async () => {
+  if (!labAtual.value || !tipoReserva.value || !tipoRecurso.value || !motivo.value) {
+    alert("Preencha todos os campos e selecione um tipo e motivo de reserva.")
     return
   }
 
@@ -480,34 +553,40 @@ const salvarReserva = async () => {
     return
   }
 
-  if (!motivo.value) {
-    alert("Por favor, selecione o motivo da reserva.")
-    return
-  }
-
   try {
     carregando.value = true
+    const { data: { user } } = await supabase.auth.getUser()
     
-    // Prepara o pacote de dados para enviar ao PHP
-    const payload = {
-      laboratorioId: laboratorioId,
-      tipoReserva: tipoReserva.value,
-      tipoRecurso: tipoRecurso.value,
-      recursoId: recursoSelecionado.value,
-      motivo: motivo.value,
-      descricao: descricao.value,
-      horariosSelecionados: horariosSelecionados.value
+    for (const agendamento of horariosSelecionados.value) {
+      // Como o array agora tem o formato "2026-11-09|13:30 - 15:30", ficou facílimo destrinchar
+      const [dataReserva, blocoHora] = agendamento.split('|')
+      const [horaInicio, horaFim] = blocoHora.split(' - ') 
+      
+      const payloadFormatado = {
+        usuario_id: user ? user.id : null,
+        laboratorio_id: labAtual.value.id,
+        tipo_recurso: tipoRecurso.value,   
+        recurso_id: recursoSelecionado.value,
+        tipo: tipoReserva.value, 
+        data_reserva: dataReserva,       // Data exata gerada diretamente da grelha
+        hora_inicio: horaInicio + ':00', 
+        hora_fim: horaFim + ':00', 
+        proposito: motivo.value 
+      }
+      
+      const resposta = await criarReserva(payloadFormatado)
+      
+      if (!resposta || resposta.status !== 'sucesso') {
+        throw new Error((resposta && resposta.mensagem) ? resposta.mensagem : "Erro desconhecido do servidor.")
+      }
     }
-
-    // Envia para o banco usando a nossa função do UseReservasApi
-    await criarReserva(payload)
     
     alert("Reserva efetuada com sucesso!")
-    router.push('/') // Volta para a página inicial
+    router.push('/')
     
   } catch (error) {
     console.error("Erro ao salvar reserva:", error)
-    alert("Ocorreu um erro ao tentar salvar a reserva.")
+    alert("Ocorreu um erro ao gravar no banco: " + error.message)
   } finally {
     carregando.value = false
   }
@@ -523,7 +602,6 @@ onMounted(() => {
 .border-grey { border: 1px solid #e0e0e0; }
 .border-green { border: 1px solid var(--q-positive); }
 
-/* Ajusta layout da tabela e dos botões de horário para manterem a mesma altura/largura */
 .table-fixed {
   table-layout: fixed;
   width: 100%;

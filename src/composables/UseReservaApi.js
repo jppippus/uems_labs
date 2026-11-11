@@ -9,5 +9,8 @@ export default function useReservasApi() {
   // Enviar os dados da reserva para o PHP
   const criarReserva = (payload) => apiPost('/reservas/criar.php', payload)
 
-  return { listarLaboratorios, criarReserva }
+  // NOVA FUNÇÃO: Busca as reservas de um laboratório específico
+  const listarReservasPorLaboratorio = (labId) => apiGet(`/reservas/listar.php?laboratorio_id=${labId}`)
+
+  return { listarLaboratorios, criarReserva, listarReservasPorLaboratorio}
 }
