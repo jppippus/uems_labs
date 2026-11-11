@@ -14,6 +14,22 @@ const routes = [
       //{ path: 'denuncia', name: 'denuncia', component: () => import('../pages/DenunciaPage.vue') },
       
       { path: 'reservar/:laboratorioId', name: 'fazer-reserva', component: () => import('../pages/ReservaPage.vue') }
+      { path: 'problemas', name: 'problemas', component: () => import('../pages/RelatarProblemaPage.vue') },
+      // RF007 - Realizar Denúncia
+      { path: 'denuncia', name: 'denuncia', component: () => import('../pages/DenunciaPage.vue') },
+      // RF009/RF010 - Área do Técnico (restrita ao perfil "tecnico")
+      {
+        path: 'tecnico',
+        name: 'tecnico-dashboard',
+        meta: { perfil: ['tecnico'] },
+        component: () => import('../pages/tecnico/TecnicoDashboardPage.vue'),
+      },
+      {
+        path: 'tecnico/problemas',
+        name: 'tecnico-problemas',
+        meta: { perfil: ['tecnico'] },
+        component: () => import('../pages/tecnico/TecnicoProblemasPage.vue'),
+      },
     ]
   },
   {

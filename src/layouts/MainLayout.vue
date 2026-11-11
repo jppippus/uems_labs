@@ -21,7 +21,18 @@
           </q-card-section>
         </q-card>
 
-        <q-list class="q-gutter-y-xs">
+        <q-list v-if="perfil === 'tecnico'" class="q-gutter-y-xs">
+          <q-item clickable v-ripple active-class="bg-grey-9 text-white" to="/tecnico" exact>
+            <q-item-section avatar><q-icon name="mdi-view-dashboard-outline" /></q-item-section>
+            <q-item-section>Dashboard</q-item-section>
+          </q-item>
+          <q-item clickable v-ripple to="/tecnico/problemas">
+            <q-item-section avatar><q-icon name="mdi-wrench-outline" /></q-item-section>
+            <q-item-section>Gerenciar Problemas</q-item-section>
+          </q-item>
+        </q-list>
+
+        <q-list v-else class="q-gutter-y-xs">
           <q-item clickable v-ripple active-class="bg-grey-9 text-white" to="/" exact>
             <q-item-section avatar><q-icon name="mdi-home-outline" /></q-item-section>
             <q-item-section>Início</q-item-section>

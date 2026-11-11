@@ -11,10 +11,11 @@ export default function useNotify() {
     })
   }
 
-  const notifyError = (message) => {
+  const notifyError = (message, detail) => {
     $q.notify({
       type: 'negative',
       message: message || 'Erro na operação.',
+      caption: detail || undefined,
       position: 'top-right'
     })
   }

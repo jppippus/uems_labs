@@ -28,15 +28,23 @@ Quasar (fetch) -> PHP/Apache (PDO) -> Postgres (Supabase)
    </Directory>
    ```
 3. **Criar o `.env` desta pasta** (`uems_labs_api/.env`, nunca commitar):
-   copie `.env.example` e preencha `CONNECTION_STRING` (pegue em
-   *Project Settings → Database → Connection string* no painel do Supabase),
-   `SUPABASE_URL` e `SUPABASE_ANON_KEY` (os mesmos já usados no
+   copie `.env.example` e preencha `CONNECTION_STRING`, `SUPABASE_URL` e
+   `SUPABASE_ANON_KEY` (os dois últimos são os mesmos já usados no
    `uems_labs/.env` do frontend — não são secretos).
+
+   **Importante sobre o `CONNECTION_STRING`**: use a connection string do
+   **Session Pooler**, não a "Direct connection". No painel do Supabase:
+   *Project Settings → Database → Connect → Session pooler*. A conexão
+   direta (`db.<project_ref>.supabase.co`) é IPv6-only e não funciona em
+   boa parte das redes/provedores no Brasil — vai dar erro de "Falha ao
+   conectar ao banco de dados" mesmo com a senha certa. O pooler usa um
+   host tipo `aws-0-<regiao>.pooler.supabase.com` e o usuário muda de
+   `postgres` pra `postgres.<project_ref>`.
 4. **Reiniciar o Apache** (XAMPP Control Panel → Stop/Start, ou
    `apache_stop.bat` + `apache_start.bat`).
 5. **Testar**: abra `http://localhost/uems-api/` no navegador. Deve
-   responder `{"status":"ok", ...}`. Se dor erro de conexão com o banco,
-   confira a senha no `CONNECTION_STRING`.
+   responder `{"status":"ok", ...}`. Se der erro de conexão com o banco,
+   confira se está usando a string do pooler (item acima), não a direta.
 
 ## Autenticação
 
