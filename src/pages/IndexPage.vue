@@ -103,46 +103,57 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useSupabase } from '../boot/supabase'
+import { ref, computed, onMounted } from 'vue'
 import useReservasApi from '../composables/UseReservaApi'
+import useApi from '../composables/UseApi'
+import useAuthUser from '../composables/UseAuthUser'
 
-const { supabase } = useSupabase()
-const { listarLaboratorios } = useReservasApi() // <-- Trazemos a API para a página inicial
+const { listarLaboratorios } = useReservasApi()
+const { apiGet } = useApi()
+const { nome, user } = useAuthUser()
 
 defineOptions({ name: 'IndexPage' })
 
-const nomeUsuario = ref('Acadêmico')
+const nomeUsuario = computed(() => (nome.value || user.value?.email || 'Acadêmico').split(' ')[0])
 const dataAtual = ref('')
-const laboratorios = ref([]) // <-- Variável que vai guardar os labs reais
+const laboratorios = ref([])
 const carregando = ref(true)
 
-const qtdReservas = ref(0)
-const proximaReserva = ref(null) 
+const minhasReservasAtivas = ref([])
+
+const qtdReservas = computed(() => minhasReservasAtivas.value.length)
+
+const proximaReserva = computed(() => {
+  const r = minhasReservasAtivas.value[0]
+  if (!r) return null
+
+  const [ano, mes, dia] = r.data_reserva.split('-')
+  const hoje = new Date().toISOString().slice(0, 10)
+  const dataFormatada = r.data_reserva === hoje ? 'Hoje' : `${dia}/${mes}/${ano}`
+
+  return {
+    laboratorio: r.laboratorio_nome,
+    dataHora: `${dataFormatada}, ${r.hora_inicio.slice(0, 5)}`,
+    localizacao: r.laboratorio_localizacao,
+    recursos: `${r.recurso_identificacao} (${r.recurso_tipo})`,
+  }
+})
 
 const formatarData = () => {
-  const opcoes = { day: 'numeric', month: 'long', year: 'numeric' };
-  const data = new Date();
-  dataAtual.value = `Hoje, ${data.toLocaleDateString('pt-BR', opcoes)}`;
+  const opcoes = { day: 'numeric', month: 'long', year: 'numeric' }
+  const data = new Date()
+  dataAtual.value = `Hoje, ${data.toLocaleDateString('pt-BR', opcoes)}`
 }
 
 const carregarDadosIniciais = async () => {
   try {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      const { data: userData } = await supabase
-        .from('usuarios')
-        .select('nome')
-        .eq('id', user.id)
-        .single()
-        
-      if (userData && userData.nome) nomeUsuario.value = userData.nome.split(' ')[0]
-    }
+    const [dadosLabs, minhasReservas] = await Promise.all([
+      listarLaboratorios(),
+      apiGet('/reservas/listar.php'),
+    ])
 
-    // CARREGA OS LABORATÓRIOS REAIS DO BACKEND
-    const data = await listarLaboratorios()
-    laboratorios.value = Array.isArray(data) ? data : (data.data || data.laboratorios || [])
-
+    laboratorios.value = Array.isArray(dadosLabs) ? dadosLabs : (dadosLabs.data || dadosLabs.laboratorios || [])
+    minhasReservasAtivas.value = minhasReservas.ativas || []
   } catch (error) {
     console.error('Erro ao buscar dados:', error)
   } finally {

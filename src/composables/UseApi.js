@@ -28,30 +28,27 @@ export default function useApi() {
       },
     })
 
-    // 1. Lemos a resposta como TEXTO PURO primeiro para não perder erros do PHP
+    // Lê como texto puro primeiro: se o PHP vazar um warning/HTML antes do
+    // JSON, isso vira um erro de parse claro em vez de um fetch "sucesso"
+    // com corpo quebrado.
     const textoCru = await response.text()
-    console.log(`[UseApi] Resposta crua de ${path}:`, textoCru)
 
-    // 2. Tentamos converter para JSON
     let body = null
     try {
       if (textoCru) {
         body = JSON.parse(textoCru)
       }
-    } catch (erro) {
-      console.error("Falha ao converter resposta do PHP para JSON:", erro)
-      console.error("Texto recebido do PHP:", textoCru)
+    } catch {
+      console.error(`[UseApi] Resposta de ${path} não é JSON válido:`, textoCru)
     }
 
-    // 3. Se houver erro HTTP (400, 500, etc)
     if (!response.ok) {
-      const msg = body?.error || body?.mensagem || textoCru.substring(0, 100)
-      throw new Error(`Erro na requisição (${response.status}): ${msg}`)
+      const msg = body?.error || textoCru.substring(0, 200)
+      throw new Error(msg || `Erro na requisição (${response.status}).`)
     }
-    
-    // 4. Se for 200 OK mas não for um JSON válido
+
     if (body === null && textoCru !== '') {
-       throw new Error("O servidor devolveu texto inválido em vez de JSON. Verifique o Console.")
+      throw new Error('O servidor devolveu uma resposta inválida.')
     }
 
     return body

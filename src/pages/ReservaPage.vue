@@ -352,8 +352,6 @@ const atualizarGradeReservas = async () => {
   
   try {
     const data = await listarReservasPorLaboratorio(labAtual.value.id)
-    console.log("Reservas vindas do banco:", data) // Inspecione isto no F12!
-    
     const todasReservas = Array.isArray(data) ? data : (data.data || data.reservas || [])
     
     reservasOcupadas.value = todasReservas.filter(res => {

@@ -23,6 +23,7 @@ if (!$laboratorioId) {
     $stmt = $pdo->prepare(
         "SELECT
             res.id,
+            res.recurso_id,
             res.tipo,
             res.data_reserva,
             res.hora_inicio,
@@ -32,6 +33,7 @@ if (!$laboratorioId) {
             rec.tipo AS recurso_tipo,
             rec.identificacao AS recurso_identificacao,
             lab.nome AS laboratorio_nome,
+            lab.localizacao AS laboratorio_localizacao,
             (res.status = 'ativa'
              AND (res.data_reserva + res.hora_fim) > (now() AT TIME ZONE 'America/Campo_Grande')
             ) AS cancelavel

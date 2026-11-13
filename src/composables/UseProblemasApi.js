@@ -5,7 +5,13 @@ export default function useProblemasApi() {
 
   const getLaboratorios = () => apiGet('/laboratorios/listar.php')
 
+  // Reservas ativas do usuário logado, pra escolher de qual relatar um problema.
+  const getMinhasReservasAtivas = async () => {
+    const dados = await apiGet('/reservas/listar.php')
+    return dados.ativas ?? []
+  }
+
   const relatarProblema = (payload) => apiPost('/problemas/relatar.php', payload)
 
-  return { getLaboratorios, relatarProblema }
+  return { getLaboratorios, getMinhasReservasAtivas, relatarProblema }
 }
