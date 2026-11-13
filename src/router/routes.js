@@ -13,7 +13,9 @@ const routes = [
       // RF007 - Realizar Denúncia
       //{ path: 'denuncia', name: 'denuncia', component: () => import('../pages/DenunciaPage.vue') },
       
-      { path: 'reservar/:laboratorioId', name: 'fazer-reserva', component: () => import('../pages/ReservaPage.vue') }
+      { path: 'reservar/:laboratorioId', name: 'fazer-reserva', component: () => import('../pages/ReservaPage.vue') },
+      // RF004/RF008 - Minhas Reservas
+      { path: 'minhas-reservas', name: 'minhas-reservas', component: () => import('../pages/MinhasReservasPage.vue') },
       { path: 'problemas', name: 'problemas', component: () => import('../pages/RelatarProblemaPage.vue') },
       // RF007 - Realizar Denúncia
       { path: 'denuncia', name: 'denuncia', component: () => import('../pages/DenunciaPage.vue') },
