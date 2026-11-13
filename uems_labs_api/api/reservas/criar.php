@@ -1,17 +1,12 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With");
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
 
 require_once __DIR__ . '/../../helpers/cors.php';
 require_once __DIR__ . '/../../helpers/response.php';
 require_once __DIR__ . '/../../middleware/auth.php';
 require_once __DIR__ . '/../../config/database.php';
+
+// POST /uems-api/api/reservas/criar.php
+// RF002 (normal) e RF003 (fixa, exclusivo de professor).
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     json_error('Método não permitido.', 405);
@@ -23,97 +18,95 @@ $body = json_body();
 if (empty($body['data_reserva']) || empty($body['hora_inicio']) || empty($body['hora_fim'])) {
     json_error('Dados de horário incompletos.', 422);
 }
+if (empty($body['proposito'])) {
+    json_error('Informe o propósito da reserva.', 422);
+}
+if (empty($body['tipo_recurso'])) {
+    json_error('Informe o tipo de recurso (Sala Completa, Computador ou Apenas Mesa).', 422);
+}
+// Quando não vem um recurso específico (ex: "Sala Completa"), o
+// laboratorio_id é obrigatório para localizar o recurso certo.
+if (empty($body['recurso_id']) && empty($body['laboratorio_id'])) {
+    json_error('Informe o laboratório.', 422);
+}
+
+$tipo = $body['tipo'] ?? 'normal';
+
+// RF003: reserva fixa é exclusiva de professores — a UI já esconde essa
+// opção pra aluno/técnico, mas o backend precisa garantir isso também.
+if ($tipo === 'fixa') {
+    require_perfil($usuario, ['professor']);
+}
 
 $pdo = get_db_connection();
-$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
 try {
     $pdo->beginTransaction();
 
-    // Se o usuário selecionou "Sala Completa", o recurso_id vem vazio. 
-    // Precisamos de usar o laboratorio_id para buscar o ID genérico da sala no banco.
-    // Se o usuário selecionou "Sala Completa", o recurso_id vem vazio. 
-    // Precisamos buscar o ID genérico da sala no banco.
-    if (empty($body['recurso_id'])) {
-        
-        // Vamos forçar a string que o banco de dados provavelmente espera.
-        // É comum, em projetos Supabase, a sala inteira ser cadastrada simplesmente como "sala"
-        $tipoRecursoBanco = 'sala'; 
-        
-        // Verifica se é computador ou mesa, para outras traduções seguras
-        if ($body['tipo_recurso'] === 'Computador') {
-            $tipoRecursoBanco = 'computador';
-        } elseif ($body['tipo_recurso'] === 'Apenas Mesa') {
-            $tipoRecursoBanco = 'mesa';
-        }
+    $recursoId = $body['recurso_id'] ?? null;
 
-        $stmtRecurso = $pdo->prepare("SELECT id FROM recursos WHERE laboratorio_id = :lab_id AND tipo = :tipo AND status = 'disponivel' LIMIT 1");
-        
+    // "Sala Completa" não tem um recurso_id vindo do frontend — localizamos
+    // o recurso tipo "sala" desse laboratório (cada laboratório tem só um).
+    if (empty($recursoId)) {
+        $tipoRecursoBanco = match ($body['tipo_recurso']) {
+            'Computador' => 'computador',
+            'Apenas Mesa' => 'mesa',
+            default => 'sala',
+        };
+
+        $stmtRecurso = $pdo->prepare(
+            "SELECT id FROM recursos WHERE laboratorio_id = :lab_id AND tipo = :tipo AND status = 'disponivel' LIMIT 1"
+        );
         $stmtRecurso->execute([
             ':lab_id' => $body['laboratorio_id'],
-            ':tipo'   => $tipoRecursoBanco
+            ':tipo'   => $tipoRecursoBanco,
         ]);
-        
-        $rec = $stmtRecurso->fetch(PDO::FETCH_ASSOC);
-        
+        $rec = $stmtRecurso->fetch();
+
         if (!$rec) {
-            // Se falhou, vamos tentar uma última vez usando 'sala_completa' 
-            // mas agora passando a string como se estivesse no banco
-             $stmtRecurso->execute([
-                ':lab_id' => $body['laboratorio_id'],
-                ':tipo'   => 'sala_completa' // Último recurso se o anterior falhar
-            ]);
-            $rec = $stmtRecurso->fetch(PDO::FETCH_ASSOC);
-            
-            if (!$rec) {
-               json_error("Não foi possível encontrar a '{$body['tipo_recurso']}' na base de dados. O tipo de recurso ($tipoRecursoBanco) não foi localizado.", 404);
-            }
+            $pdo->rollBack();
+            json_error("Nenhum recurso do tipo \"{$body['tipo_recurso']}\" disponível nesse laboratório no momento.", 404);
         }
-        $body['recurso_id'] = $rec['id'];
+        $recursoId = $rec['id'];
     }
 
-    $data_fim = ($body['tipo'] === 'fixa') ? '2026-12-20' : $body['data_reserva'];
-
-    if ($body['tipo'] === 'fixa') {
-        $stmt = $pdo->prepare('SELECT * FROM criar_reserva_fixa(:usuario_id, :recurso_id, :hora_inicio, :hora_fim, :proposito, :data_inicio, :data_fim)');
+    if ($tipo === 'fixa') {
+        // Reserva fixa semanal até o fim do semestre.
+        $dataFimSemestre = '2026-12-20';
+        $stmt = $pdo->prepare(
+            'SELECT * FROM criar_reserva_fixa(:usuario_id, :recurso_id, :hora_inicio, :hora_fim, :proposito, :data_inicio, :data_fim)'
+        );
         $stmt->execute([
             ':usuario_id'  => $usuario['id'],
-            ':recurso_id'  => $body['recurso_id'], 
+            ':recurso_id'  => $recursoId,
             ':hora_inicio' => $body['hora_inicio'],
             ':hora_fim'    => $body['hora_fim'],
             ':proposito'   => $body['proposito'],
             ':data_inicio' => $body['data_reserva'],
-            ':data_fim'    => $data_fim
+            ':data_fim'    => $dataFimSemestre,
         ]);
     } else {
-        $stmt = $pdo->prepare("
-            INSERT INTO reservas (usuario_id, recurso_id, data_reserva, hora_inicio, hora_fim, proposito, status) 
-            VALUES (:usuario_id, :recurso_id, :data_reserva, :hora_inicio, :hora_fim, :proposito, 'ativa')
-        ");
+        $stmt = $pdo->prepare(
+            "INSERT INTO reservas (usuario_id, recurso_id, tipo, data_reserva, hora_inicio, hora_fim, proposito, status)
+             VALUES (:usuario_id, :recurso_id, 'normal', :data_reserva, :hora_inicio, :hora_fim, :proposito, 'ativa')"
+        );
         $stmt->execute([
             ':usuario_id'   => $usuario['id'],
-            ':recurso_id'   => $body['recurso_id'],
+            ':recurso_id'   => $recursoId,
             ':data_reserva' => $body['data_reserva'],
             ':hora_inicio'  => $body['hora_inicio'],
             ':hora_fim'     => $body['hora_fim'],
-            ':proposito'    => $body['proposito']
+            ':proposito'    => $body['proposito'],
         ]);
     }
 
     $pdo->commit();
 
-    json_response([
-        'status' => 'sucesso',
-        'mensagem' => 'Reserva efetuada com sucesso!'
-    ], 201);
-
+    json_response(['status' => 'sucesso', 'mensagem' => 'Reserva efetuada com sucesso!'], 201);
 } catch (PDOException $e) {
     $pdo->rollBack();
     if ($e->getCode() === '23P01') {
         json_error('Esse horário já está reservado. Escolha outro.', 409);
     }
-    json_error('Erro de SQL: ' . $e->getMessage(), 500);
-} catch (Exception $e) {
-    $pdo->rollBack();
-    json_error($e->getMessage(), 400);
+    json_error('Não foi possível concluir a reserva. Tente novamente.', 500);
 }

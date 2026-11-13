@@ -6,6 +6,9 @@ const user = ref(null)
 // Perfil (aluno/professor/tecnico) da tabela "usuarios" — usado pro
 // redirecionamento e pelas guardas de rota por perfil.
 const perfil = ref(null)
+// Nome de exibição (tabela "usuarios") — usado na sidebar, evita cada
+// tela ter que buscar isso de novo via Supabase direto.
+const nome = ref(null)
 
 export default function useAuthUser() {
   const { supabase } = useSupabase()
@@ -19,6 +22,7 @@ export default function useAuthUser() {
     if (error) throw error
 
     perfil.value = data.perfil
+    nome.value = data.nome
     return data
   }
 
@@ -40,6 +44,7 @@ export default function useAuthUser() {
 
     user.value = null
     perfil.value = null
+    nome.value = null
   }
 
   const isLoggedIn = () => {
@@ -55,6 +60,7 @@ export default function useAuthUser() {
     if (!session) {
       user.value = null
       perfil.value = null
+      nome.value = null
       return null
     }
 
@@ -69,6 +75,7 @@ export default function useAuthUser() {
   return {
     user,
     perfil,
+    nome,
     login,
     logout,
     isLoggedIn,

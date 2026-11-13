@@ -17,7 +17,10 @@
             <q-avatar color="grey-7" text-color="white" size="32px" class="q-mr-sm">
               {{ inicialAvatar }}
             </q-avatar>
-            <div class="text-weight-medium text-capitalize">{{ perfilUsuario }}</div>
+            <div>
+              <div class="text-weight-medium">{{ nome || user?.email }}</div>
+              <div class="text-caption text-grey-5 text-capitalize">{{ perfil }}</div>
+            </div>
           </q-card-section>
         </q-card>
 
@@ -67,50 +70,21 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import useAuthUser from '../composables/UseAuthUser'
-import { useSupabase } from '../boot/supabase'
 
 defineOptions({ name: 'MainLayout' })
 
 const router = useRouter()
-const { logout } = useAuthUser()
-const { supabase } = useSupabase()
+const { user, perfil, nome, logout } = useAuthUser()
 
-const inicialAvatar = ref('A')
-const perfilUsuario = ref('Acadêmico')
-
-const carregarDadosMenu = async () => {
-  try {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      const { data: userData } = await supabase
-        .from('usuarios')
-        .select('nome, perfil')
-        .eq('id', user.id)
-        .single()
-        
-      if (userData) {
-        if (userData.nome) {
-          inicialAvatar.value = userData.nome.charAt(0).toUpperCase()
-        }
-        if (userData.perfil) {
-          perfilUsuario.value = userData.perfil
-        }
-      }
-    }
-  } catch (error) {
-    console.error('Erro ao buscar dados para o menu:', error)
-  }
-}
+// user/perfil/nome já vêm carregados pela guarda de rota (sincronizarSessao
+// em router/index.js), não precisa buscar de novo aqui.
+const inicialAvatar = computed(() => (nome.value || user.value?.email || '?').charAt(0).toUpperCase())
 
 const handleLogout = async () => {
   await logout()
   router.push({ name: 'login' })
 }
-
-onMounted(() => {
-  carregarDadosMenu()
-})
 </script>
