@@ -37,7 +37,7 @@
             <q-item-section avatar><q-icon name="mdi-home-outline" /></q-item-section>
             <q-item-section>Início</q-item-section>
           </q-item>
-          <q-item clickable v-ripple to="/reservas">
+          <q-item clickable v-ripple to="/minhas-reservas">
             <q-item-section avatar><q-icon name="mdi-calendar-check-outline" /></q-item-section>
             <q-item-section>Minhas Reservas</q-item-section>
           </q-item>
