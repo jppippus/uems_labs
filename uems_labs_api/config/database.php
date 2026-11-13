@@ -33,9 +33,10 @@ function get_db_connection(): PDO
             PDO::ATTR_EMULATE_PREPARES => true,
         ]);
     } catch (PDOException $e) {
+        error_log('[uems-api] Falha ao conectar ao banco: ' . $e->getMessage());
         http_response_code(500);
         header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(['error' => 'Falha ao conectar: ' . $e->getMessage()]);
+        echo json_encode(['error' => 'Falha ao conectar ao banco de dados.']);
         exit;
     }
 
